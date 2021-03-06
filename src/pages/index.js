@@ -1,13 +1,35 @@
 import * as React from "react"
-import { Link } from "gatsby"
+import { Link, graphql } from "gatsby"
 import { StaticImage } from "gatsby-plugin-image"
-
+import styled from 'styled-components';
 import Layout from "../components/layout"
 import SEO from "../components/seo"
+import BlogPost from "../templates/blog-post";
 
-const IndexPage = () => (
+const BlogLink = styled(Link)`
+  text-decoration: none
+`;
+
+const BlogTitle = styled.h3`
+  marign-bottom: 20px;
+  color: green;
+`;
+
+const Index = ({ data }) => (
   <Layout>
     <SEO title="Home" />
+    <div>
+      <h1>Dani's thoughts</h1>
+      <h4>{data.allMarkdownRemark.totalCount}</h4>
+      {data.allMarkdownRemark.edges.map(({ node }) => (
+        <div key={node.id}>
+          <BlogLink to={node.fields.slug}>
+            <BlogTitle>{node.frontmatter.title} - {node.frontmatter.date}</BlogTitle>
+          </BlogLink>
+          <p>{node.excerpt}</p>
+        </div>
+      ))}
+    </div>
     <h1>Hi people</h1>
     <p>Welcome to your new Gatsby site.</p>
     <p>Now go build something great.</p>
@@ -25,5 +47,23 @@ const IndexPage = () => (
     </p>
   </Layout>
 )
-
-export default IndexPage
+export default Index;
+export const query = graphql`
+query  {
+  allMarkdownRemark(sort: { fields: [frontmatter___date], order: DESC }) {
+    edges {
+      node {
+        excerpt
+        frontmatter {
+          date
+          description
+          title
+        }
+        fields{
+          slug
+        }
+      }
+    }
+    totalCount
+  }
+}`;
